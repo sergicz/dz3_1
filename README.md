@@ -23,8 +23,8 @@ sudo apt-get install -y gcc git awscli postgresql # install libs
 
 git clone https://github.com/electrum/tpch-dbgen.git # TPCH generator
 make makefile.suite
-**^^^^^^^^^^^^^^^^^^
-не завелось
+^^^^^^^^^^^^^^^^^^
+**не завелось**
 
 ./dbgen -v -h -s 10 # generate data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,7 +53,7 @@ First create table definitions.
 Then load data into it.
 ```sql
 -- DDL scripts to create table
-Поскольку пришлось делать на постгресе - все полезные фичи колончных баз пришлось выключить:
+Поскольку пришлось делать на постгресе - все полезные фичи колоночных баз пришлось выключить:
 
 CREATE TABLE customer
 (C_CUSTKEY INT, 
