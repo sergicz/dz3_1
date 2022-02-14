@@ -23,8 +23,12 @@ sudo apt-get install -y gcc git awscli postgresql # install libs
 
 git clone https://github.com/electrum/tpch-dbgen.git # TPCH generator
 make makefile.suite
+**^^^^^^^^^^^^^^^^^^
+не завелось
 
 ./dbgen -v -h -s 10 # generate data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+тож не завелось
 
 for i in `ls *.tbl`; do sed 's/|$//' $i > ${i/tbl/csv}; echo $i; done; # convert to a CSV format compatible with PostgreSQL
 
@@ -46,12 +50,10 @@ Read more at:
 # 3. COPY to database
 
 First create table definitions.
-
 Then load data into it.
-
-
 ```sql
 -- DDL scripts to create table
+Поскольку пришлось делать на постгресе - все полезные фичи колончных баз пришлось выключить:
 
 CREATE TABLE customer
 (C_CUSTKEY INT, 
@@ -61,9 +63,7 @@ C_NATIONKEY INTEGER,
 C_PHONE CHAR(15),
 C_ACCTBAL DECIMAL(15,2),
 C_MKTSEGMENT CHAR(10),
-C_COMMENT VARCHAR(117))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (C_CUSTKEY);
+C_COMMENT VARCHAR(117));
 
 CREATE TABLE lineitem
 (L_ORDERKEY BIGINT,
@@ -81,20 +81,13 @@ L_COMMITDATE DATE,
 L_RECEIPTDATE DATE,
 L_SHIPINSTRUCT CHAR(25),
 L_SHIPMODE CHAR(10),
-L_COMMENT VARCHAR(44))
-WITH (appendonly=true, orientation=column, compresstype=ZSTD)
-DISTRIBUTED BY (L_ORDERKEY,L_LINENUMBER)
-PARTITION BY RANGE (L_SHIPDATE)
-(start('1992-01-01') INCLUSIVE end ('1998-12-31') INCLUSIVE every (30),
-default partition others);
+L_COMMENT VARCHAR(44));
 
 CREATE TABLE nation
 (N_NATIONKEY INTEGER, 
 N_NAME CHAR(25), 
 N_REGIONKEY INTEGER, 
-N_COMMENT VARCHAR(152))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (N_NATIONKEY);
+N_COMMENT VARCHAR(152));
 
 CREATE TABLE orders
 (O_ORDERKEY BIGINT,
@@ -105,12 +98,7 @@ O_ORDERDATE DATE,
 O_ORDERPRIORITY CHAR(15), 
 O_CLERK  CHAR(15), 
 O_SHIPPRIORITY INTEGER,
-O_COMMENT VARCHAR(79))
-WITH (appendonly=true, orientation=column, compresstype=ZSTD)
-DISTRIBUTED BY (O_ORDERKEY)
-PARTITION BY RANGE (O_ORDERDATE)
-(start('1992-01-01') INCLUSIVE end ('1998-12-31') INCLUSIVE every (30),
-default partition others);
+O_COMMENT VARCHAR(79));
 
 CREATE TABLE part
 (P_PARTKEY INT,
@@ -121,25 +109,19 @@ P_TYPE VARCHAR(25),
 P_SIZE INTEGER,
 P_CONTAINER CHAR(10),
 P_RETAILPRICE DECIMAL(15,2),
-P_COMMENT VARCHAR(23))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (P_PARTKEY);
+P_COMMENT VARCHAR(23));
 
 CREATE TABLE partsupp
 (PS_PARTKEY INT,
 PS_SUPPKEY INT,
 PS_AVAILQTY INTEGER,
 PS_SUPPLYCOST DECIMAL(15,2),
-PS_COMMENT VARCHAR(199))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (PS_PARTKEY,PS_SUPPKEY);
+PS_COMMENT VARCHAR(199));
 
 CREATE TABLE region
 (R_REGIONKEY INTEGER, 
 R_NAME CHAR(25),
-R_COMMENT VARCHAR(152))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (R_REGIONKEY);
+R_COMMENT VARCHAR(152));
 
 CREATE TABLE supplier 
 (S_SUPPKEY INT,
@@ -148,15 +130,13 @@ S_ADDRESS VARCHAR(40),
 S_NATIONKEY INTEGER,
 S_PHONE CHAR(15),
 S_ACCTBAL DECIMAL(15,2),
-S_COMMENT VARCHAR(101))
-WITH (appendonly=true, orientation=column)
-DISTRIBUTED BY (S_SUPPKEY);
+S_COMMENT VARCHAR(101));
 ```
 
 On a VM with installed psql execute COPY pointing to local csv files:
 
 ```bash
-export GREENPLUM_URI="postgres://greenplum:<pass>@<host>:5432/postgres"
+export GREENPLUM_URI="postgres://postgres:<pass>@<host>:6432/postgres"
 psql $GREENPLUM_URI
 
 \copy customer from  '/home/dbgen/tpch-dbgen/data/customer.csv' WITH (FORMAT csv, DELIMITER '|');
@@ -167,7 +147,8 @@ psql $GREENPLUM_URI
 \copy partsupp from  '/home/dbgen/tpch-dbgen/data/partsupp.csv' WITH (FORMAT csv, DELIMITER '|');
 \copy region from  '/home/dbgen/tpch-dbgen/data/region.csv' WITH (FORMAT csv, DELIMITER '|');
 \copy supplier from  '/home/dbgen/tpch-dbgen/data/supplier.csv' WITH (FORMAT csv, DELIMITER '|');
-```
+^^^^^^^^^^^^^^^^^
+часа 2-3 грузилось все это хозяйство
 
 # 4. Run dbtVault + Greenplum demo 
 
@@ -199,11 +180,14 @@ dbtvault_greenplum_demo:
       type: postgres
       threads: 2
       host: {yc-greenplum-host}
-      port: 5432
-      user: greenplum
-      pass: {yc-greenplum-pass}
-      dbname: postgres
+      port: 4432
+      user: postgres
+      pass: postgres
+      dbname: analytics
       schema: public
+      keepalives: 1
+      keepalives_idle: 60
+      connect_timeout: 30000
   target: dev
 
 ```
@@ -242,7 +226,8 @@ Install package:
 ```bash
 dbt deps
 
-```
+^^^^^^^^^^^^^^^^^^^^^^
+вместо пп.4-5 скачал готовый докеримидж fishtownanalytics/dbt:0.19.0 и поменял entrypoint, чтобы туда проект форкнуть
 
 **6. Adapt models to Greenplum/PostgreSQL**
 
@@ -253,7 +238,8 @@ Check out the [commit history](https://github.com/kzzzr/dbtvault_greenplum_demo/
 * [bba7437](https://github.com/kzzzr/dbtvault_greenplum_demo/commit/bba7437a7d29fd5dd9c383bff49c4604fc84d2ab) - configure data sources for greenplum - Artemiy Kozyr
 * [aa25600](https://github.com/kzzzr/dbtvault_greenplum_demo/commit/aa2560071b27b2e7f6de924222b7d465e28d8af2) - configure package (adapted dbt_vault) for greenplum - Artemiy Kozyr
 * [eafed95](https://github.com/kzzzr/dbtvault_greenplum_demo/commit/eafed95ad5b912daf9339d877dfa0ee246bd089f) - configure dbt_project.yml for greenplum - Artemiy Kozyr
-
+^^^^^^^^^^^^^^^^^^^^
+полазил по веткам - немного не понял, что там адаптировать - все и так с ходу завелось на постгресе
 
 **7. Run models step-by-step**
 
