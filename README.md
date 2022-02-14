@@ -266,7 +266,6 @@ vars:
   load_date: '1992-01-08' # increment by one day '1992-01-09'
 ^^^^^^^^^^^^^^^^^
 добавил до 1992-01-11 включительно, все контрольные запросы работают нормально
-![](https://user-images.githubusercontent.com/98316269/153876551-c9f7aee1-9841-4144-8f68-57ad91fadcbe.png)
+![image](https://user-images.githubusercontent.com/98316269/153876551-c9f7aee1-9841-4144-8f68-57ad91fadcbe.png)
 ![](https://user-images.githubusercontent.com/98316269/153876619-6431bb8a-5e75-415c-89bc-db6012a5c0de.png)
 ![](https://user-images.githubusercontent.com/98316269/153876660-180e9de8-c129-4947-8f52-06c86e9abcf4.png)
-![](https://habrastorage.org/webt/hu/tf/6s/hutf6sstdjvtxgujcmhchocjpws.png)
