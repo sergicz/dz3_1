@@ -24,7 +24,7 @@ sudo apt-get install -y gcc git awscli postgresql # install libs
 git clone https://github.com/electrum/tpch-dbgen.git # TPCH generator
 make makefile.suite
 ^^^^^^^^^^^^^^^^^^
-**не завелось**
+<b>не завелось</b>
 
 ./dbgen -v -h -s 10 # generate data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
